@@ -55,12 +55,22 @@ export default function OpportunityCard({ opportunity }: OpportunityCardProps) {
       {/* Image */}
       <div className="relative h-48 w-full">
         {opportunity.image && opportunity.image.trim() !== '' ? (
-          <Image
-            src={opportunity.image}
-            alt={opportunity.title}
-            fill
-            className="object-cover"
-          />
+          opportunity.image.startsWith('/') ? (
+            // Local image - use regular img tag
+            <img
+              src={opportunity.image}
+              alt={opportunity.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            // External image - use next/image
+            <Image
+              src={opportunity.image}
+              alt={opportunity.title}
+              fill
+              className="object-cover"
+            />
+          )
         ) : (
           <div className="w-full h-full bg-gray-200 flex items-center justify-center">
             <div className="text-gray-400 text-4xl">📋</div>

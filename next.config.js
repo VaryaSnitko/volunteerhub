@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    domains: ['images.unsplash.com', 'via.placeholder.com'],
-  },
+  // No special image configuration needed for local images in public folder
 };
 
 module.exports = nextConfig; 
