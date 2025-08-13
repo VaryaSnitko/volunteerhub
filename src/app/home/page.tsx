@@ -94,7 +94,11 @@ export default function HomePage() {
       if (storedOpportunities) {
         const allOpportunities = JSON.parse(storedOpportunities);
         const orgOpportunities = allOpportunities.filter(
-          (opp: Opportunity) => opp.organizationEmail === JSON.parse(storedOrgData).email
+          (opp: Opportunity) => {
+            if (!storedOrgData) return false;
+            const orgData = JSON.parse(storedOrgData);
+            return opp.organizationEmail === orgData.email;
+          }
         );
         setFilteredOpportunities(orgOpportunities);
       } else {
