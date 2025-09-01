@@ -4,6 +4,7 @@ export interface Opportunity {
   image: string;
   type: string;
   location: string;
+  address: string;
   description: string;
   organization: string;
   duration: string;
@@ -13,7 +14,11 @@ export interface Opportunity {
   benefits: string[];
   contactEmail: string;
   contactPhone: string;
-  organizationEmail: string; // new field
+  organizationEmail: string;
+  date: string;
+  time: string;
+  capacity: number;
+  currentSignups: number;
 }
 
 const localImages = ['/volunteering.jpg', '/hand.jpg', '/people.jpg'];
@@ -25,6 +30,7 @@ export const opportunities: Opportunity[] = [
     image: localImages[0],
     type: 'environment',
     location: 'in-person',
+    address: 'Dubai, Jumeirah Beach',
     description: 'Help keep our beaches clean and protect marine life by participating in our monthly beach cleanup events.',
     organization: 'Ocean Conservation Society',
     duration: '3-4 hours',
@@ -44,194 +50,169 @@ export const opportunities: Opportunity[] = [
     contactEmail: 'volunteer@oceanconservation.org',
     contactPhone: '(555) 123-4567',
     organizationEmail: '',
+    date: '2024-02-15',
+    time: '09:00 AM - 12:00 PM',
+    capacity: 25,
+    currentSignups: 12
   },
   {
     id: '2',
-    title: 'Online Math Tutor',
+    title: 'Senior Center Reading Program',
     image: localImages[1],
-    type: 'education',
-    location: 'online',
-    description: 'Provide one-on-one math tutoring to students who need extra support with their studies.',
-    organization: 'Education First Initiative',
-    duration: '1-2 hours',
-    commitment: 'Weekly',
-    fullDescription: 'Help students build confidence and improve their math skills through personalized online tutoring sessions. You\'ll work with students from elementary to high school levels, providing homework help, test preparation, and concept reinforcement. Flexible scheduling available.',
-    requirements: [
-      'Strong math skills (algebra, geometry, calculus)',
-      'Patience and good communication skills',
-      'Reliable internet connection',
-      'Background check required'
-    ],
-    benefits: [
-      'Flexible remote work schedule',
-      'Make a difference in students\' lives',
-      'Gain teaching experience',
-      'Professional development opportunities'
-    ],
-    contactEmail: 'tutoring@educationfirst.org',
-    contactPhone: '(555) 234-5678',
-    organizationEmail: '',
-  },
-  {
-    id: '3',
-    title: 'Senior Companion',
-    image: localImages[2],
     type: 'elderly',
     location: 'in-person',
-    description: 'Provide companionship and support to elderly residents in our community care facilities.',
-    organization: 'Golden Years Care Center',
-    duration: '2-3 hours',
+    address: 'Dubai, DIFC',
+    description: 'Share the joy of reading with seniors at our local community center. Help improve their cognitive health and provide companionship.',
+    organization: 'Community Care Center',
+    duration: '1-2 hours',
     commitment: 'Weekly',
-    fullDescription: 'Brighten the day of our senior residents by providing friendly companionship, engaging in activities, and offering emotional support. Activities may include reading, playing games, taking walks, or simply having meaningful conversations.',
+    fullDescription: 'Our reading program helps seniors maintain cognitive function and provides much-needed social interaction. Volunteers read aloud from books, newspapers, or magazines, and engage in meaningful conversations with participants. This is a wonderful opportunity to make a difference in the lives of our elderly community members.',
     requirements: [
-      'Compassionate and patient demeanor',
-      'Good listening skills',
+      'Patience and empathy',
+      'Clear speaking voice',
       'Reliability and punctuality',
       'Background check required'
     ],
     benefits: [
       'Build meaningful relationships',
       'Learn from life experiences',
-      'Make a positive impact on seniors\' lives',
-      'Gain healthcare experience'
+      'Improve communication skills',
+      'Make a positive impact on mental health'
     ],
-    contactEmail: 'volunteer@goldenyears.org',
+    contactEmail: 'volunteer@communitycare.org',
+    contactPhone: '(555) 234-5678',
+    organizationEmail: '',
+    date: '2024-02-20',
+    time: '02:00 PM - 04:00 PM',
+    capacity: 8,
+    currentSignups: 5
+  },
+  {
+    id: '3',
+    title: 'Online Tutoring for Students',
+    image: localImages[2],
+    type: 'education',
+    location: 'online',
+    address: 'Virtual - Zoom',
+    description: 'Provide academic support to students in need through our virtual tutoring program. Help them succeed in their educational journey.',
+    organization: 'Digital Learning Initiative',
+    duration: '1-1.5 hours',
+    commitment: 'Flexible',
+    fullDescription: 'Join our online tutoring program to help students who need academic support. Subjects include math, science, English, and history. Volunteers work one-on-one with students through video conferencing platforms, providing personalized instruction and encouragement. This is a great way to share your knowledge and help students reach their potential.',
+    requirements: [
+      'Strong academic background',
+      'Reliable internet connection',
+      'Patience and teaching ability',
+      'Background check required'
+    ],
+    benefits: [
+      'Flexible scheduling',
+      'Develop teaching skills',
+      'Make a difference in education',
+      'Work from anywhere'
+    ],
+    contactEmail: 'tutors@digitallearning.org',
     contactPhone: '(555) 345-6789',
     organizationEmail: '',
+    date: '2024-02-18',
+    time: '06:00 PM - 08:00 PM',
+    capacity: 15,
+    currentSignups: 8
   },
   {
     id: '4',
-    title: 'Animal Shelter Helper',
+    title: 'Animal Shelter Care Assistant',
     image: localImages[0],
     type: 'animals',
     location: 'in-person',
-    description: 'Help care for animals at our local shelter by feeding, walking, and socializing with them.',
-    organization: 'Paws & Hearts Animal Shelter',
-    duration: '2-4 hours',
+    address: 'Dubai, Al Barsha',
+    description: 'Help care for animals at our local shelter. Assist with feeding, cleaning, and providing love and attention to animals in need.',
+    organization: 'Happy Paws Animal Shelter',
+    duration: '2-3 hours',
     commitment: 'Weekly',
-    fullDescription: 'Join our team of animal lovers in providing care and attention to dogs, cats, and other animals awaiting adoption. Duties include feeding, cleaning kennels, walking dogs, socializing with animals, and helping with adoption events.',
+    fullDescription: 'Our animal shelter relies on dedicated volunteers to help care for dogs, cats, and other animals waiting for their forever homes. Volunteers assist with feeding, cleaning kennels, walking dogs, socializing animals, and helping with adoption events. This is a rewarding opportunity for animal lovers to make a direct impact on animal welfare.',
     requirements: [
       'Love for animals',
-      'Physical ability to walk dogs',
-      'Comfortable with cleaning tasks',
-      'Age 16+ (with parental consent if under 18)'
+      'Physical ability to handle animals',
+      'Reliability and punctuality',
+      'Willingness to get dirty'
     ],
     benefits: [
-      'Spend time with adorable animals',
-      'Help animals find forever homes',
-      'Learn about animal care',
-      'Join a community of animal lovers'
+      'Work with animals',
+      'Learn animal care skills',
+      'Help animals find homes',
+      'Join a caring community'
     ],
-    contactEmail: 'volunteer@pawsandhearts.org',
+    contactEmail: 'volunteer@happypaws.org',
     contactPhone: '(555) 456-7890',
     organizationEmail: '',
+    date: '2024-02-22',
+    time: '10:00 AM - 01:00 PM',
+    capacity: 12,
+    currentSignups: 7
   },
   {
     id: '5',
-    title: 'Food Bank Distribution',
-    image: localImages[1],
-    type: 'food',
-    location: 'in-person',
-    description: 'Help distribute food to families in need at our local food bank and community centers.',
-    organization: 'Community Food Bank',
-    duration: '3-5 hours',
-    commitment: 'Weekly',
-    fullDescription: 'Support our mission to fight hunger in the community by helping with food distribution, sorting donations, and assisting clients. This role involves physical activity and direct interaction with community members.',
-    requirements: [
-      'Physical ability to lift boxes (up to 25 lbs)',
-      'Friendly and non-judgmental attitude',
-      'Reliability and punctuality',
-      'Bilingual skills helpful but not required'
-    ],
-    benefits: [
-      'Directly help families in need',
-      'Learn about food security issues',
-      'Build community connections',
-      'Gain nonprofit experience'
-    ],
-    contactEmail: 'volunteer@communityfoodbank.org',
-    contactPhone: '(555) 567-8901',
-    organizationEmail: '',
-  },
-  {
-    id: '6',
-    title: 'Youth Mentor',
-    image: localImages[2],
-    type: 'youth',
-    location: 'hybrid',
-    description: 'Mentor at-risk youth through our after-school program, providing guidance and support.',
-    organization: 'Youth Empowerment Network',
-    duration: '2-3 hours',
-    commitment: 'Weekly',
-    fullDescription: 'Make a lasting impact on young lives by serving as a positive role model and mentor. Help youth develop life skills, academic confidence, and career aspirations through one-on-one mentoring and group activities.',
-    requirements: [
-      'Commitment to youth development',
-      'Good communication and listening skills',
-      'Reliability and consistency',
-      'Background check and training required'
-    ],
-    benefits: [
-      'Make a lasting impact on youth',
-      'Develop leadership skills',
-      'Gain mentoring experience',
-      'Join a supportive community'
-    ],
-    contactEmail: 'mentor@youthempowerment.org',
-    contactPhone: '(555) 678-9012',
-    organizationEmail: '',
-  },
-  {
-    id: '7',
-    title: 'Hospital Volunteer',
-    image: localImages[0],
-    type: 'healthcare',
-    location: 'in-person',
-    description: 'Provide support to patients and staff at our local hospital through various volunteer roles.',
-    organization: 'City General Hospital',
-    duration: '4-6 hours',
-    commitment: 'Weekly',
-    fullDescription: 'Support our healthcare team by assisting with patient comfort, administrative tasks, and visitor services. Roles include patient escort, information desk assistance, and clerical support.',
-    requirements: [
-      'Compassionate and professional demeanor',
-      'Ability to follow hospital protocols',
-      'Reliability and punctuality',
-      'Health screening and training required'
-    ],
-    benefits: [
-      'Gain healthcare experience',
-      'Help patients and families',
-      'Learn about hospital operations',
-      'Professional networking opportunities'
-    ],
-    contactEmail: 'volunteer@citygeneral.org',
-    contactPhone: '(555) 789-0123',
-    organizationEmail: '',
-  },
-  {
-    id: '8',
-    title: 'Community Garden Coordinator',
+    title: 'Community Garden Maintenance',
     image: localImages[1],
     type: 'community',
     location: 'in-person',
+    address: 'Dubai, Al Qusais',
     description: 'Help maintain our community garden and teach others about sustainable gardening practices.',
     organization: 'Green Thumb Community',
     duration: '2-4 hours',
-    commitment: 'Weekly',
-    fullDescription: 'Lead gardening activities, maintain garden plots, and educate community members about sustainable agriculture. Help grow fresh produce for local food banks and community members.',
+    commitment: 'Bi-weekly',
+    fullDescription: 'Our community garden provides fresh produce for local families and serves as an educational space for sustainable gardening. Volunteers help with planting, weeding, harvesting, and maintaining garden infrastructure. We also host workshops and educational events for community members of all ages.',
     requirements: [
-      'Basic gardening knowledge',
-      'Physical ability to garden',
-      'Teaching or leadership experience helpful',
-      'Commitment to sustainability'
+      'Interest in gardening',
+      'Ability to work outdoors',
+      'Willingness to learn',
+      'Physical stamina'
     ],
     benefits: [
-      'Connect with nature',
-      'Teach sustainable practices',
-      'Build community relationships',
-      'Enjoy fresh produce'
+      'Learn gardening skills',
+      'Connect with community',
+      'Enjoy fresh air and exercise',
+      'Contribute to food security'
     ],
     contactEmail: 'garden@greenthumb.org',
-    contactPhone: '(555) 890-1234',
+    contactPhone: '(555) 567-8901',
     organizationEmail: '',
+    date: '2024-02-25',
+    time: '08:00 AM - 11:00 AM',
+    capacity: 20,
+    currentSignups: 14
+  },
+  {
+    id: '6',
+    title: 'Youth Mentoring Program',
+    image: localImages[2],
+    type: 'youth',
+    location: 'hybrid',
+    address: 'Dubai, Downtown',
+    description: 'Mentor young people and help them develop life skills, confidence, and positive relationships.',
+    organization: 'Future Leaders Foundation',
+    duration: '1-2 hours',
+    commitment: 'Weekly',
+    fullDescription: 'Our mentoring program pairs adult volunteers with young people who could benefit from guidance and support. Mentors help mentees develop life skills, build confidence, set goals, and make positive choices. This program includes both in-person meetings and virtual check-ins, providing flexibility for both mentors and mentees.',
+    requirements: [
+      'Commitment to youth development',
+      'Good communication skills',
+      'Reliability and consistency',
+      'Background check required'
+    ],
+    benefits: [
+      'Make a lasting impact',
+      'Develop leadership skills',
+      'Learn from young perspectives',
+      'Join a supportive community'
+    ],
+    contactEmail: 'mentor@futureleaders.org',
+    contactPhone: '(555) 678-9012',
+    organizationEmail: '',
+    date: '2024-02-28',
+    time: '04:00 PM - 06:00 PM',
+    capacity: 10,
+    currentSignups: 6
   }
 ]; 

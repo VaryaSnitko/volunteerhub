@@ -9,13 +9,18 @@ interface Opportunity {
   image: string;
   type: string;
   location: string;
+  address: string;
   description: string;
   organization: string;
   duration: string;
   commitment: string;
+  date: string;
+  time: string;
+  capacity: number;
+  currentSignups: number;
 }
 
-interface OpportunityCardProps {
+export interface OpportunityCardProps {
   opportunity: Opportunity;
 }
 
@@ -48,10 +53,31 @@ export default function OpportunityCard({ opportunity }: OpportunityCardProps) {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  const getCapacityStatus = () => {
+    const percentage = (opportunity.currentSignups / opportunity.capacity) * 100;
+    if (percentage >= 90) {
+      return { text: 'Almost Full', color: 'text-red-600' };
+    } else if (percentage >= 70) {
+      return { text: 'Filling Up', color: 'text-orange-600' };
+    } else {
+      return { text: 'Open', color: 'text-green-600' };
+    }
+  };
+
   const typeColors = getTypeColor(opportunity.type);
+  const capacityStatus = getCapacityStatus();
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
       {/* Image */}
       <div className="relative h-48 w-full">
         {opportunity.image && opportunity.image.trim() !== '' ? (
@@ -84,7 +110,7 @@ export default function OpportunityCard({ opportunity }: OpportunityCardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-4 flex-1 flex flex-col">
         <h3 className="text-lg font-semibold text-black mb-2 line-clamp-2">
           {opportunity.title}
         </h3>
@@ -93,23 +119,39 @@ export default function OpportunityCard({ opportunity }: OpportunityCardProps) {
           {opportunity.description}
         </p>
 
-        <div className="flex items-center text-sm text-gray-500 mb-3">
-          <span className="mr-4">{opportunity.organization}</span>
-          <span className="flex items-center">
-            {getLocationIcon(opportunity.location)} {opportunity.location}
-          </span>
+        <div className="space-y-2 mb-4 flex-1">
+          {/* Date and Time */}
+          <div className="flex items-center text-sm text-gray-600">
+            <span className="mr-2">📅</span>
+            <span>{formatDate(opportunity.date)}</span>
+            <span className="mx-2">•</span>
+            <span>🕒</span>
+            <span className="ml-1">{opportunity.time}</span>
+          </div>
+
+          {/* Location */}
+          <div className="flex items-center text-sm text-gray-600">
+            <span className="mr-2">📍</span>
+            <span>{opportunity.address}</span>
+          </div>
+
+          {/* Capacity */}
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center text-gray-600">
+              <span className="mr-2">👥</span>
+              <span>{opportunity.currentSignups}/{opportunity.capacity} volunteers</span>
+            </div>
+            <span className={`font-medium ${capacityStatus.color}`}>
+              {capacityStatus.text}
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-          <span>⏱️ {opportunity.duration}</span>
-          <span>📅 {opportunity.commitment}</span>
-        </div>
-
-        <Link
-          href={`/opportunity/${opportunity.id}`}
-          className="block w-full bg-red-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-        >
-          Learn More
+        {/* Action Button */}
+        <Link href={`/opportunity/${opportunity.id}`} className="mt-auto">
+          <button className="w-full bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700 transition-colors">
+            Learn More
+          </button>
         </Link>
       </div>
     </div>

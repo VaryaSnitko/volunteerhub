@@ -99,25 +99,25 @@ export default function LoginPage() {
   if (viewState === 'welcome') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white px-4">
-        <div className="max-w-md w-full space-y-8 p-8 border border-gray-200 rounded-lg shadow-md">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-black mb-4">Welcome to VolunteerHub</h1>
-            <p className="text-gray-600 text-lg leading-relaxed">
+        <div className="max-w-md w-full space-y-6 sm:space-y-8 p-6 sm:p-8 border border-gray-200 rounded-lg shadow-md">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-black mb-3 sm:mb-4">Welcome to VolunteerHub</h1>
+            <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
               Connect with your community and make a difference. Find volunteering opportunities 
               that match your interests and skills, or join organizations making positive change.
             </p>
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <button
               onClick={goToLogin}
-              className="w-full bg-red-600 text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-red-700 transition-colors"
+              className="w-full bg-red-600 text-white py-3 px-6 rounded-lg font-semibold text-base sm:text-lg hover:bg-red-700 transition-colors"
             >
               Log In
             </button>
             <button
               onClick={goToSignup}
-              className="w-full border-2 border-red-600 text-red-600 py-3 px-6 rounded-lg font-semibold text-lg hover:bg-red-50 transition-colors"
+              className="w-full border-2 border-red-600 text-red-600 py-3 px-6 rounded-lg font-semibold text-base sm:text-lg hover:bg-red-50 transition-colors"
             >
               Sign Up
             </button>
@@ -129,7 +129,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
-      <div className="max-w-md w-full space-y-8 p-8 border border-gray-200 rounded-lg shadow-md">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8 p-6 sm:p-8 border border-gray-200 rounded-lg shadow-md">
         <div className="text-center mb-6">
           <button
             onClick={goBack}
@@ -137,10 +137,10 @@ export default function LoginPage() {
           >
             ← Back
           </button>
-          <h1 className="text-3xl font-bold text-black mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black mb-2">
             {viewState === 'login' ? 'Welcome Back' : 'Join VolunteerHub'}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-sm sm:text-base">
             {viewState === 'login' 
               ? 'Log in to your account to continue' 
               : 'Create your account to get started'
@@ -195,7 +195,6 @@ export default function LoginPage() {
               >
                 <option value="volunteer">Volunteer</option>
                 <option value="admin">Admin</option>
-                <option value="social-organization">Social Organization</option>
               </select>
             </div>
           )}

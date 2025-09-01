@@ -6,67 +6,107 @@ import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import OpportunityCard, { getTypeColor } from '../../components/OpportunityCard';
 import { opportunities as mockOpportunities, Opportunity } from '../../data/opportunities';
+import { 
+  addNotification
+} from '../../services/notificationService';
 
 export default function HomePage() {
   const router = useRouter();
   const [filteredOpportunities, setFilteredOpportunities] = useState<Opportunity[]>([]);
+  const [allOpportunities, setAllOpportunities] = useState<Opportunity[]>([]);
   const [preferences, setPreferences] = useState<any>(null);
   const [userType, setUserType] = useState<string>('');
   const [organizationData, setOrganizationData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0); // Add refresh key
+  const [refreshKey, setRefreshKey] = useState(0);
+  
+  // New state for tab and filtering
+  const [activeTab, setActiveTab] = useState<'recommended' | 'all'>('recommended');
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [showAll, setShowAll] = useState(false);
 
-  // Function to refresh opportunities based on current preferences
-  const refreshOpportunities = () => {
-    const storedPreferences = localStorage.getItem('volunteerPreferences');
-    if (storedPreferences) {
-      const userPreferences = JSON.parse(storedPreferences);
-      setPreferences(userPreferences);
+  // Available options for filtering
+  const volunteeringTypes = ['environment', 'education', 'elderly', 'healthcare', 'animals', 'community', 'youth', 'food'];
+  const daysOptions = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-      // Load all opportunities (from localStorage or mock data)
-      let allOpportunities: Opportunity[] = [];
-      const stored = localStorage.getItem('opportunities');
-      if (stored) {
-        const postedOpportunities = JSON.parse(stored);
-        // Combine posted opportunities with mock opportunities
-        allOpportunities = [...mockOpportunities, ...postedOpportunities];
-      } else {
-        allOpportunities = mockOpportunities;
-      }
-
-      // Apply filtering with priority: types -> days -> location
-      let filtered = allOpportunities;
-
-      // Priority 1: Filter by volunteering types (highest priority)
-      if (userPreferences.volunteeringTypes && userPreferences.volunteeringTypes.length > 0) {
-        filtered = filtered.filter(opp => 
-          userPreferences.volunteeringTypes.includes(opp.type)
-        );
-      }
-
-      // Priority 2: Filter by preferred days (if types filtering didn't eliminate all)
-      if (filtered.length > 0 && userPreferences.preferredDays && userPreferences.preferredDays.length > 0) {
-        // For now, we'll show opportunities regardless of days since we don't have day-specific data
-        // In a real app, opportunities would have day information
-        // This is a placeholder for future enhancement
-        console.log('Preferred days:', userPreferences.preferredDays);
-      }
-
-      // Priority 3: Filter by location preference (lowest priority)
-      if (filtered.length > 0 && userPreferences.locationPreference) {
-        filtered = filtered.filter(opp => 
-          opp.location === userPreferences.locationPreference || 
-          opp.location === 'hybrid'
-        );
-      }
-
-      // If no matches after all filters, show all opportunities
-      if (filtered.length === 0) {
-        filtered = allOpportunities;
-      }
-
-      setFilteredOpportunities(filtered);
+  // Function to load and filter opportunities
+  const loadOpportunities = () => {
+    // Load all opportunities (from localStorage or mock data)
+    let opportunities: Opportunity[] = [];
+    const stored = localStorage.getItem('opportunities');
+    if (stored) {
+      const postedOpportunities = JSON.parse(stored);
+      opportunities = [...mockOpportunities, ...postedOpportunities];
+    } else {
+      opportunities = mockOpportunities;
     }
+    setAllOpportunities(opportunities);
+    return opportunities;
+  };
+
+  // Function to get recommended opportunities based on preferences
+  const getRecommendedOpportunities = (opportunities: Opportunity[]) => {
+    const storedPreferences = localStorage.getItem('volunteerPreferences');
+    if (!storedPreferences) return opportunities;
+
+    const userPreferences = JSON.parse(storedPreferences);
+    setPreferences(userPreferences);
+
+    let filtered = opportunities;
+
+    // Apply preference-based filtering
+    if (userPreferences.volunteeringTypes && userPreferences.volunteeringTypes.length > 0) {
+      filtered = filtered.filter(opp => 
+        userPreferences.volunteeringTypes.includes(opp.type)
+      );
+    }
+
+
+
+    // If no matches, show all opportunities
+    if (filtered.length === 0) {
+      filtered = opportunities;
+    }
+
+    return filtered;
+  };
+
+  // Function to get filtered opportunities for "All Opportunities" tab
+  const getFilteredOpportunities = () => {
+    let filtered = allOpportunities;
+
+    // Filter by selected types
+    if (selectedTypes.length > 0) {
+      filtered = filtered.filter(opp => selectedTypes.includes(opp.type));
+    }
+
+    // Note: Day filtering would require opportunity data to include day information
+    // For now, we'll skip day filtering as the current data doesn't include this
+
+    return filtered;
+  };
+
+  // Filter change handlers
+  const handleTypeChange = (type: string) => {
+    if (selectedTypes.includes(type)) {
+      setSelectedTypes(selectedTypes.filter(t => t !== type));
+    } else {
+      setSelectedTypes([...selectedTypes, type]);
+    }
+  };
+
+  const handleDayChange = (day: string) => {
+    if (selectedDays.includes(day)) {
+      setSelectedDays(selectedDays.filter(d => d !== day));
+    } else {
+      setSelectedDays([...selectedDays, day]);
+    }
+  };
+
+  const handleResetFilters = () => {
+    setSelectedTypes([]);
+    setSelectedDays([]);
   };
 
   useEffect(() => {
@@ -116,22 +156,26 @@ export default function HomePage() {
         return;
       }
 
-      refreshOpportunities();
+      // Load opportunities and set initial filtered opportunities
+      const opportunities = loadOpportunities();
+      const recommended = getRecommendedOpportunities(opportunities);
+      setFilteredOpportunities(recommended);
       setLoading(false);
     }
-  }, [router, refreshKey]); // Add refreshKey as dependency
+  }, [router, refreshKey]);
 
-  // Add focus event listener to refresh opportunities when returning from profile
+  // Update filtered opportunities when tab or filters change
   useEffect(() => {
-    const handleFocus = () => {
-      if (userType === 'volunteer') {
-        refreshOpportunities();
+    if (userType === 'volunteer' && !loading && allOpportunities.length > 0) {
+      if (activeTab === 'recommended') {
+        const recommended = getRecommendedOpportunities(allOpportunities);
+        setFilteredOpportunities(recommended);
+      } else {
+        const filtered = getFilteredOpportunities();
+        setFilteredOpportunities(filtered);
       }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [userType]);
+    }
+  }, [activeTab, selectedTypes, selectedDays, allOpportunities]);
 
   if (loading) {
     return (
@@ -203,7 +247,7 @@ export default function HomePage() {
               </p>
               <Link href="/organization/opportunity/new">
                 <button className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                  Post Your First Opportunity
+                  Post Your Opportunity
                 </button>
               </Link>
             </div>
@@ -236,30 +280,115 @@ export default function HomePage() {
             Volunteering Opportunities
           </h1>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Based on your preferences, we've found {filteredOpportunities.length} opportunities that match your interests.
+            {activeTab === 'recommended' 
+              ? `Based on your preferences, we've found ${filteredOpportunities.length} opportunities that match your interests.`
+              : `Explore all ${filteredOpportunities.length} opportunities available.`
+            }
           </p>
+          
+
         </div>
 
-        {/* Filter Summary */}
-        {preferences && (
-          <div className="bg-gray-50 rounded-lg p-4 mb-8">
-            <h2 className="text-lg font-semibold text-black mb-3">Your Preferences:</h2>
-            <div className="flex flex-wrap gap-2">
-              {preferences.volunteeringTypes?.map((type: string) => {
-                const typeColors = getTypeColor(type);
-                return (
-                  <span key={type} className={`px-3 py-1 rounded-full text-sm font-medium ${typeColors.bg} ${typeColors.text}`}>
-                    {type}
-                  </span>
-                );
-              })}
-              {preferences.locationPreference && (
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                  {preferences.locationPreference}
-                </span>
-              )}
+        {/* Tab Navigation */}
+        <div className="flex justify-center mb-8">
+          <div className="flex flex-col sm:flex-row bg-gray-100 rounded-lg p-1 w-full sm:w-auto">
+            <button
+              onClick={() => setActiveTab('recommended')}
+              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-colors text-sm sm:text-base ${
+                activeTab === 'recommended'
+                  ? 'bg-red-600 text-white'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Recommended for You
+            </button>
+            <button
+              onClick={() => setActiveTab('all')}
+              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-colors text-sm sm:text-base ${
+                activeTab === 'all'
+                  ? 'bg-red-600 text-white'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              All Opportunities
+            </button>
+          </div>
+        </div>
+
+        {/* Filter Bar - Only show for "All Opportunities" tab */}
+        {activeTab === 'all' && (
+          <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 mb-8 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-4">
+              <h2 className="text-lg font-semibold text-black">Filter Opportunities</h2>
+              <button
+                onClick={handleResetFilters}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors w-full sm:w-auto"
+              >
+                Reset Filters
+              </button>
+            </div>
+
+          {/* Filter Dropdowns */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Type Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Volunteering Types</label>
+              <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedTypes.length === 0}
+                    onChange={() => setSelectedTypes([])}
+                    className="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">All Types</span>
+                </label>
+                {volunteeringTypes.map((type) => (
+                  <label key={type} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedTypes.includes(type)}
+                      onChange={() => handleTypeChange(type)}
+                      className="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Day Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Days</label>
+              <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedDays.length === 0}
+                    onChange={() => setSelectedDays([])}
+                    className="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">All Days</span>
+                </label>
+                {daysOptions.map((day) => (
+                  <label key={day} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedDays.includes(day)}
+                      onChange={() => handleDayChange(day)}
+                      className="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      {day.charAt(0).toUpperCase() + day.slice(1)}
+                    </span>
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
+        </div>
         )}
 
         {/* Opportunities Grid */}
@@ -285,27 +414,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Show All Opportunities Link */}
-        {filteredOpportunities.length > 0 && (
-          <div className="text-center mt-8">
-            <button
-              onClick={() => {
-                const stored = localStorage.getItem('opportunities');
-                let allOpportunities = [...mockOpportunities]; // Always start with mock opportunities
-                if (stored) {
-                  const postedOpportunities = JSON.parse(stored);
-                  allOpportunities = [...mockOpportunities, ...postedOpportunities]; // Combine mock + posted
-                }
-                
-                // Show ALL opportunities without any filtering
-                setFilteredOpportunities(allOpportunities);
-              }}
-              className="text-red-600 hover:text-red-700 font-medium underline"
-            >
-              Show all opportunities
-            </button>
-          </div>
-        )}
+
       </div>
     </div>
   );

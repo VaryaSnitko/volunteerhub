@@ -38,19 +38,20 @@ interface OrganizationData {
 export default function ProfilePage() {
   const router = useRouter();
   const [preferences, setPreferences] = useState<any>(null);
-  const [submissions, setSubmissions] = useState<VolunteerSubmission[]>([]);
   const [organizationData, setOrganizationData] = useState<OrganizationData | null>(null);
   const [userType, setUserType] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [userInfo, setUserInfo] = useState<any>(null);
 
   useEffect(() => {
-    // Load user type
+    // Load user type and info
     const user = localStorage.getItem('user');
     const userTypeFromStorage = localStorage.getItem('userType');
     
     if (user) {
       const userData = JSON.parse(user);
       setUserType(userData.userType || userTypeFromStorage || 'volunteer');
+      setUserInfo(userData);
     }
 
     // Load data based on user type
@@ -64,11 +65,6 @@ export default function ProfilePage() {
       const storedPreferences = localStorage.getItem('volunteerPreferences');
       if (storedPreferences) {
         setPreferences(JSON.parse(storedPreferences));
-      }
-
-      const storedSubmissions = localStorage.getItem('volunteerSubmissions');
-      if (storedSubmissions) {
-        setSubmissions(JSON.parse(storedSubmissions));
       }
     }
 
@@ -245,7 +241,7 @@ export default function ProfilePage() {
     );
   }
 
-  // Volunteer Profile (existing code)
+  // Volunteer Profile
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -261,13 +257,32 @@ export default function ProfilePage() {
           </button>
         </div>
 
+        {/* User Information Section */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-black mb-4">Account Information</h2>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-black mb-2">Email</h3>
+              <p className="text-gray-600">{userInfo?.email || 'volunteer@example.com'}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-black mb-2">Account Type</h3>
+              <p className="text-gray-600">Volunteer</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-black mb-2">Member Since</h3>
+              <p className="text-gray-600">{userInfo?.createdAt ? new Date(userInfo.createdAt).toLocaleDateString() : 'Recently'}</p>
+            </div>
+          </div>
+        </div>
+
         {/* Preferences Section */}
         <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-black">Volunteering Preferences</h2>
-            <Link href="/onboarding">
+            <Link href="/update-preferences">
               <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                Edit Preferences
+                Update Preferences
               </button>
             </Link>
           </div>
@@ -293,57 +308,16 @@ export default function ProfilePage() {
                 <div className="flex flex-wrap gap-2">
                   {preferences.preferredDays?.map((day: string) => (
                     <span key={day} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                      {day}
+                      {day.charAt(0).toUpperCase() + day.slice(1)}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div>
-                <h3 className="font-semibold text-black mb-2">Location Preference:</h3>
-                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                  {preferences.locationPreference}
-                </span>
-              </div>
+
             </div>
           ) : (
             <p className="text-gray-600">No preferences set. <Link href="/onboarding" className="text-red-600 hover:text-red-700">Set your preferences</Link></p>
-          )}
-        </div>
-
-        {/* Submissions Section */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-black mb-4">Your Volunteer Applications</h2>
-
-          {submissions.length > 0 ? (
-            <div className="space-y-4">
-              {submissions.map((submission) => (
-                <div key={submission.id} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-black mb-2">
-                        {submission.opportunityTitle}
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-2">
-                        Applied on: {new Date(submission.submittedAt).toLocaleDateString()}
-                      </p>
-                      <p className="text-gray-700 text-sm">
-                        <strong>Motivation:</strong> {submission.motivation.substring(0, 100)}
-                        {submission.motivation.length > 100 ? '...' : ''}
-                      </p>
-                    </div>
-                    <Link
-                      href={`/opportunity/${submission.opportunityId}`}
-                      className="text-red-600 hover:text-red-700 text-sm font-medium"
-                    >
-                      View Opportunity
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-600">No applications yet. <Link href="/home" className="text-red-600 hover:text-red-700">Browse opportunities</Link></p>
           )}
         </div>
       </div>

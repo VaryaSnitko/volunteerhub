@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { addNotification, createSignupConfirmationNotification } from '../services/notificationService';
+import { useToast } from '../contexts/ToastContext';
+import { createSignupSuccessToast } from '../services/toastService';
 
 interface SignupFormProps {
   opportunityId: string;
@@ -10,6 +13,7 @@ interface SignupFormProps {
 
 export default function SignupForm({ opportunityId, opportunityTitle }: SignupFormProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -80,13 +84,32 @@ export default function SignupForm({ opportunityId, opportunityTitle }: SignupFo
         submittedAt: new Date().toISOString()
       };
 
+      // Update user info with name if not already set
+      const existingUser = localStorage.getItem('user');
+      if (existingUser) {
+        const userData = JSON.parse(existingUser);
+        if (!userData.name && formData.name) {
+          userData.name = formData.name;
+          localStorage.setItem('user', JSON.stringify(userData));
+        }
+      }
+
       // Add new submission
       existingSubmissions.push(submission);
       localStorage.setItem('volunteerSubmissions', JSON.stringify(existingSubmissions));
 
-      // Show success message and redirect
-      alert('Thank you for signing up! We\'ll be in touch soon.');
-      router.push('/home');
+      // Add notification
+      const notification = createSignupConfirmationNotification(opportunityTitle);
+      addNotification(notification);
+
+      // Show toast notification
+      const toast = createSignupSuccessToast(opportunityTitle);
+      showToast(toast);
+
+      // Redirect after a short delay to show the toast
+      setTimeout(() => {
+        router.push('/home');
+      }, 1000);
     } catch (error) {
       console.error('Error saving submission:', error);
       alert('There was an error saving your submission. Please try again.');
