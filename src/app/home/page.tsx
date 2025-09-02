@@ -122,46 +122,20 @@ export default function HomePage() {
       setUserType(userTypeFromStorage || 'volunteer');
     }
 
-    if (userTypeFromStorage === 'social-organization') {
-      // Load organization data
-      const storedOrgData = localStorage.getItem('organizationData');
-      if (storedOrgData) {
-        setOrganizationData(JSON.parse(storedOrgData));
-      }
-      
-      // Load organization's opportunities
-      const storedOpportunities = localStorage.getItem('opportunities');
-      if (storedOpportunities) {
-        const allOpportunities = JSON.parse(storedOpportunities);
-        const orgOpportunities = allOpportunities.filter(
-          (opp: Opportunity) => {
-            if (!storedOrgData) return false;
-            const orgData = JSON.parse(storedOrgData);
-            return opp.organizationEmail === orgData.email;
-          }
-        );
-        setFilteredOpportunities(orgOpportunities);
-      } else {
-        setFilteredOpportunities([]);
-      }
-      
-      setLoading(false);
-    } else {
-      // Volunteer flow - check if user has completed onboarding
-      const storedPreferences = localStorage.getItem('volunteerPreferences');
-      
-      if (!storedPreferences) {
-        // Redirect to onboarding if no preferences found
-        router.push('/onboarding');
-        return;
-      }
-
-      // Load opportunities and set initial filtered opportunities
-      const opportunities = loadOpportunities();
-      const recommended = getRecommendedOpportunities(opportunities);
-      setFilteredOpportunities(recommended);
-      setLoading(false);
+    // Check if user has completed onboarding
+    const storedPreferences = localStorage.getItem('volunteerPreferences');
+    
+    if (!storedPreferences) {
+      // Redirect to onboarding if no preferences found
+      router.push('/onboarding');
+      return;
     }
+
+    // Load opportunities and set initial filtered opportunities
+    const opportunities = loadOpportunities();
+    const recommended = getRecommendedOpportunities(opportunities);
+    setFilteredOpportunities(recommended);
+    setLoading(false);
   }, [router, refreshKey]);
 
   // Update filtered opportunities when tab or filters change
@@ -191,82 +165,7 @@ export default function HomePage() {
     );
   }
 
-  // Organization Home Page
-  if (userType === 'social-organization' && organizationData) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Navbar />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-black mb-2">
-                Your Opportunities
-              </h1>
-              <p className="text-gray-600 text-lg">
-                Manage and track your posted volunteering opportunities
-              </p>
-            </div>
-            <Link href="/organization/opportunity/new">
-              <button className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors font-semibold">
-                Post New Opportunity
-              </button>
-            </Link>
-          </div>
 
-          {/* Organization Info */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-semibold text-black mb-3">{organizationData.organizationName}</h2>
-            <p className="text-gray-600 mb-2">{organizationData.shortDescription}</p>
-            <div className="flex flex-wrap gap-2">
-              {organizationData.causeAreas?.map((cause: string) => {
-                const typeColors = getTypeColor(cause);
-                return (
-                  <span key={cause} className={`px-3 py-1 rounded-full text-sm font-medium ${typeColors.bg} ${typeColors.text}`}>
-                    {cause}
-                  </span>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Opportunities Grid */}
-          {filteredOpportunities.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredOpportunities.map((opportunity) => (
-                <OpportunityCard key={opportunity.id} opportunity={opportunity} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-6xl mb-4">📋</div>
-              <h3 className="text-xl font-semibold text-black mb-2">No opportunities posted yet</h3>
-              <p className="text-gray-600 mb-6">
-                Start by posting your first volunteering opportunity to connect with volunteers.
-              </p>
-              <Link href="/organization/opportunity/new">
-                <button className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                  Post Your Opportunity
-                </button>
-              </Link>
-            </div>
-          )}
-
-          {/* Quick Actions */}
-          {filteredOpportunities.length > 0 && (
-            <div className="mt-8 text-center">
-              <Link href="/profile">
-                <button className="text-red-600 hover:text-red-700 font-medium underline">
-                  View full profile and manage opportunities
-                </button>
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
 
   // Volunteer Home Page (existing code)
   return (

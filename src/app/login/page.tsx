@@ -29,17 +29,7 @@ export default function LoginPage() {
     // Check if user type is stored
     const userType = localStorage.getItem('userType');
     
-    if (userType === 'social-organization') {
-      // For organizations, check if they have organization data
-      const organizationData = localStorage.getItem('organizationData');
-      if (organizationData) {
-        localStorage.setItem('user', JSON.stringify({ email: form.email }));
-        router.push('/home'); // Organizations go to home (their opportunities page)
-      } else {
-        // Organization needs to complete onboarding
-        setViewState('organization-onboarding');
-      }
-    } else if (userType === 'admin') {
+    if (userType === 'admin') {
       // For admins, check if they have preferences
       const onboarding = localStorage.getItem('volunteerPreferences');
       if (onboarding) {

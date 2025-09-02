@@ -144,8 +144,16 @@ export default function OnboardingForm({ isUpdateMode = false }: OnboardingFormP
   };
 
   // Get user type for display
-  const userType = localStorage.getItem('userType') || 'volunteer';
-  const isAdmin = userType === 'admin';
+  const [userType, setUserType] = useState('volunteer');
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserType = localStorage.getItem('userType') || 'volunteer';
+      setUserType(storedUserType);
+      setIsAdmin(storedUserType === 'admin');
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-white py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
