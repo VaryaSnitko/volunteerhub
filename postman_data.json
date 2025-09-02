@@ -1,0 +1,157 @@
+{
+	"info": {
+		"_postman_id": "f72c8731-a69d-4c7c-a9b8-1b1619849ce5",
+		"name": "hub",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "MasterData",
+			"item": [
+				{
+					"name": "Insert Cause",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-staff-name",
+								"value": "Test",
+								"type": "default"
+							},
+							{
+								"key": "x-staff-id",
+								"value": "S482917",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\":\"SPRINTER\",\r\n    \"description\":\"Sprinter Cause\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/cause",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"cause"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Causes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-staff-name",
+								"value": "Test",
+								"type": "default"
+							},
+							{
+								"key": "x-staff-id",
+								"value": "S482917",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/cause",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"cause"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Opportunity",
+			"item": [
+				{
+					"name": "Insert",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-staff-name",
+								"value": "Test",
+								"type": "default"
+							},
+							{
+								"key": "x-staff-id",
+								"value": "S482917",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"TEST EVENT\",\r\n    \"type\": \"SPRINTER\",\r\n    \"eventDate\": \"\",\r\n    \"capacity\": 10,\r\n    \"startTime\": \"\",\r\n    \"endTime\": \"\",\r\n    \"address\": \"\",\r\n    \"shortDescription\": \"\",\r\n    \"fullDescription\": \"\",\r\n    \"email\": \"\",\r\n    \"phone\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/opportunity",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"oppurtunity"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-staff-name",
+								"value": "Test",
+								"type": "default"
+							},
+							{
+								"key": "x-staff-id",
+								"value": "S482917",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/oppurtunity",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"oppurtunity"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
