@@ -3,11 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import OnboardingForm from '../../components/OnboardingForm';
-import OrganizationOnboardingForm from '../../components/OrganizationOnboardingForm';
 
 type UserType = 'volunteer' | 'admin';
 
-type ViewState = 'welcome' | 'login' | 'signup' | 'onboarding' | 'organization-onboarding';
+type ViewState = 'welcome' | 'login' | 'signup' | 'onboarding';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,6 +39,21 @@ export default function LoginPage() {
         // Organization needs to complete onboarding
         setViewState('organization-onboarding');
       }
+    } else if (userType === 'admin') {
+      // For admins, check if they have preferences
+      const onboarding = localStorage.getItem('volunteerPreferences');
+      if (onboarding) {
+        localStorage.setItem('user', JSON.stringify({ 
+          email: form.email,
+          userType: 'admin'
+        }));
+        // Ensure userType is set
+        localStorage.setItem('userType', 'admin');
+        router.push('/admin'); // Admins go to admin dashboard
+      } else {
+        // Admin needs to complete onboarding
+        setViewState('onboarding');
+      }
     } else {
       // For volunteers, check if they have preferences
       const onboarding = localStorage.getItem('volunteerPreferences');
@@ -62,12 +76,7 @@ export default function LoginPage() {
     e.preventDefault();
     // Store user type and redirect to appropriate onboarding
     localStorage.setItem('userType', form.userType);
-    
-    if (form.userType === 'social-organization') {
-      setViewState('organization-onboarding');
-    } else {
-      setViewState('onboarding');
-    }
+    setViewState('onboarding');
   };
 
   const goToLogin = () => {
@@ -92,9 +101,7 @@ export default function LoginPage() {
     return <OnboardingForm />;
   }
 
-  if (viewState === 'organization-onboarding') {
-    return <OrganizationOnboardingForm />;
-  }
+
 
   if (viewState === 'welcome') {
     return (
