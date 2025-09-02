@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 interface Opportunity {
   id: string;
@@ -18,6 +19,17 @@ interface Opportunity {
   time: string;
   capacity: number;
   currentSignups: number;
+}
+
+interface VolunteerSubmission {
+  id: string;
+  opportunityId: string;
+  opportunityTitle: string;
+  name: string;
+  email: string;
+  motivation: string;
+  submittedAt: string;
+  status?: 'active' | 'completed' | 'cancelled';
 }
 
 export interface OpportunityCardProps {
@@ -40,6 +52,20 @@ export const getTypeColor = (type: string) => {
 };
 
 export default function OpportunityCard({ opportunity }: OpportunityCardProps) {
+  const [attendees, setAttendees] = useState<VolunteerSubmission[]>([]);
+
+  useEffect(() => {
+    // Load attendees for this opportunity
+    const storedSubmissions = localStorage.getItem('volunteerSubmissions');
+    if (storedSubmissions) {
+      const allSubmissions = JSON.parse(storedSubmissions);
+      const opportunityAttendees = allSubmissions.filter(
+        (submission: VolunteerSubmission) => submission.opportunityId === opportunity.id
+      );
+      setAttendees(opportunityAttendees);
+    }
+  }, [opportunity.id]);
+
   const getLocationIcon = (location: string) => {
     switch (location) {
       case 'in-person':
@@ -75,6 +101,10 @@ export default function OpportunityCard({ opportunity }: OpportunityCardProps) {
 
   const typeColors = getTypeColor(opportunity.type);
   const capacityStatus = getCapacityStatus();
+
+  // Show up to 4 attendees + count indicator if more
+  const displayAttendees = attendees.slice(0, 4);
+  const remainingCount = attendees.length - 4;
 
   return (
     <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
@@ -135,16 +165,49 @@ export default function OpportunityCard({ opportunity }: OpportunityCardProps) {
             <span>{opportunity.address}</span>
           </div>
 
-          {/* Capacity */}
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center text-gray-600">
-              <span className="mr-2">👥</span>
-              <span>{opportunity.currentSignups}/{opportunity.capacity} volunteers</span>
+          {/* Attendees */}
+          {attendees.length > 0 && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <span className="mr-2 text-sm text-gray-600">👥</span>
+                <div className="flex -space-x-2">
+                  {displayAttendees.map((attendee, index) => (
+                    <div
+                      key={attendee.id}
+                      className="w-6 h-6 rounded-full border-1 border-red bg-red-100 flex items-center justify-center text-xs font-medium text-red-600 shadow-sm"
+                      title={attendee.name}
+                    >
+                      {attendee.name.charAt(0).toUpperCase()}
+                    </div>
+                  ))}
+                  {remainingCount > 0 && (
+                    <div
+                      className="w-6 h-6 rounded-full border-2 border-white bg-purple-500 flex items-center justify-center text-xs font-medium text-white shadow-sm"
+                      title={`${remainingCount} more volunteers`}
+                    >
+                      +{remainingCount}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <span className={`text-xs font-medium ${capacityStatus.color}`}>
+                {capacityStatus.text}
+              </span>
             </div>
-            <span className={`font-medium ${capacityStatus.color}`}>
-              {capacityStatus.text}
-            </span>
-          </div>
+          )}
+
+          {/* Capacity (only show if no attendees) */}
+          {attendees.length === 0 && (
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center text-gray-600">
+                <span className="mr-2">👥</span>
+                <span>{opportunity.currentSignups}/{opportunity.capacity} volunteers</span>
+              </div>
+              <span className={`font-medium ${capacityStatus.color}`}>
+                {capacityStatus.text}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Action Button */}

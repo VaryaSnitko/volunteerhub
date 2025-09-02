@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import OnboardingForm from '../../components/OnboardingForm';
 import OrganizationOnboardingForm from '../../components/OrganizationOnboardingForm';
 
-type UserType = 'volunteer' | 'admin' | 'social-organization';
+type UserType = 'volunteer' | 'admin';
 
 type ViewState = 'welcome' | 'login' | 'signup' | 'onboarding' | 'organization-onboarding';
 

@@ -5,29 +5,9 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# Handle Next.js static assets
-[[redirects]]
-  from = "/_next/*"
-  to = "/_next/:splat"
-  status = 200
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
-# Handle dynamic routes
-[[redirects]]
-  from = "/opportunity/*"
-  to = "/opportunity/[id]"
-  status = 200
-
-[[redirects]]
-  from = "/signup/*"
-  to = "/signup/[id]"
-  status = 200
-
-[[redirects]]
-  from = "/organization/opportunity/*"
-  to = "/organization/opportunity/[id]"
-  status = 200
-
-# Catch-all for client-side routing
 [[redirects]]
   from = "/*"
   to = "/index.html"

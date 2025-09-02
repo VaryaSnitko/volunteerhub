@@ -78,7 +78,8 @@ export default function Navbar() {
               Home
             </Link>
             
-            {userType === 'volunteer' && (
+            {/* Navigation for volunteers and admins */}
+            {(userType === 'volunteer' || userType === 'admin') && (
               <Link
                 href="/my-opportunities"
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -88,6 +89,20 @@ export default function Navbar() {
                 }`}
               >
                 My Opportunities
+              </Link>
+            )}
+            
+            {/* Admin Dashboard Link */}
+            {userType === 'admin' && (
+              <Link
+                href="/admin"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive('/admin')
+                    ? 'bg-red-100 text-red-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                Admin Dashboard
               </Link>
             )}
             
@@ -198,7 +213,8 @@ export default function Navbar() {
                 Home
               </Link>
               
-              {userType === 'volunteer' && (
+              {/* Navigation for volunteers and admins */}
+              {(userType === 'volunteer' || userType === 'admin') && (
                 <Link
                   href="/my-opportunities"
                   className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
@@ -209,6 +225,21 @@ export default function Navbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   My Opportunities
+                </Link>
+              )}
+              
+              {/* Admin Dashboard Link for Mobile */}
+              {userType === 'admin' && (
+                <Link
+                  href="/admin"
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                    isActive('/admin')
+                      ? 'bg-red-100 text-red-700'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Admin Dashboard
                 </Link>
               )}
               

@@ -48,11 +48,11 @@ export default function MyOpportunitiesPage() {
   };
 
   useEffect(() => {
-    // Check if user is logged in as volunteer
+    // Check if user is logged in as volunteer or admin
     const user = localStorage.getItem('user');
     const userType = localStorage.getItem('userType');
     
-    if (!user || userType !== 'volunteer') {
+    if (!user || (userType !== 'volunteer' && userType !== 'admin')) {
       router.push('/login');
       return;
     }

@@ -32,7 +32,8 @@ export default function OnboardingForm({ isUpdateMode = false }: OnboardingFormP
   const router = useRouter();
   const [formData, setFormData] = useState({
     volunteeringTypes: [] as string[],
-    preferredDays: [] as string[]
+    preferredDays: [] as string[],
+    phoneNumber: ''
   });
 
   // Load existing preferences only if in update mode
@@ -41,7 +42,10 @@ export default function OnboardingForm({ isUpdateMode = false }: OnboardingFormP
       const existingPreferences = localStorage.getItem('volunteerPreferences');
       if (existingPreferences) {
         const preferences = JSON.parse(existingPreferences);
-        setFormData(preferences);
+        setFormData(prev => ({
+          ...prev,
+          ...preferences
+        }));
       }
     }
   }, [isUpdateMode]);
@@ -64,6 +68,14 @@ export default function OnboardingForm({ isUpdateMode = false }: OnboardingFormP
     }));
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -71,44 +83,111 @@ export default function OnboardingForm({ isUpdateMode = false }: OnboardingFormP
     localStorage.setItem('volunteerPreferences', JSON.stringify(formData));
     
     if (!isUpdateMode) {
-      // Set user type as volunteer (only for new signups)
-      localStorage.setItem('userType', 'volunteer');
+      // Get user type from localStorage
+      const userType = localStorage.getItem('userType') || 'volunteer';
       
       // Create user object if it doesn't exist
       const existingUser = localStorage.getItem('user');
       if (!existingUser) {
         localStorage.setItem('user', JSON.stringify({ 
-          userType: 'volunteer',
-          email: 'volunteer@example.com', // placeholder
-          name: 'Volunteer',
-          profilePicture: '' // Will show initials by default
+          userType: userType,
+          email: 'user@example.com', // placeholder
+          name: userType === 'admin' ? 'Admin' : 'Volunteer',
+          profilePicture: '', // Will show initials by default
+          phoneNumber: formData.phoneNumber // Save phone number to user object
         }));
+      } else {
+        // Update existing user with phone number
+        const userData = JSON.parse(existingUser);
+        userData.phoneNumber = formData.phoneNumber;
+        localStorage.setItem('user', JSON.stringify(userData));
       }
       
-      // Redirect to home for new signups
-      router.push('/home');
+      // Redirect based on user type
+      if (userType === 'admin') {
+        router.push('/admin'); // Admin goes to admin dashboard
+      } else {
+        router.push('/home'); // Volunteers go to home
+      }
     } else {
       // For update mode, go back to profile
       router.push('/profile');
     }
   };
 
+  const handleSkip = () => {
+    if (!isUpdateMode) {
+      // Get user type from localStorage
+      const userType = localStorage.getItem('userType') || 'volunteer';
+      
+      // Create user object if it doesn't exist
+      const existingUser = localStorage.getItem('user');
+      if (!existingUser) {
+        localStorage.setItem('user', JSON.stringify({ 
+          userType: userType,
+          email: 'user@example.com', // placeholder
+          name: userType === 'admin' ? 'Admin' : 'Volunteer',
+          profilePicture: '' // Will show initials by default
+        }));
+      }
+      
+      // Redirect based on user type
+      if (userType === 'admin') {
+        router.push('/admin'); // Admin goes to admin dashboard
+      } else {
+        router.push('/home'); // Volunteers go to home
+      }
+    } else {
+      // For update mode, go back to profile
+      router.push('/profile');
+    }
+  };
+
+  // Get user type for display
+  const userType = localStorage.getItem('userType') || 'volunteer';
+  const isAdmin = userType === 'admin';
+
   return (
     <div className="min-h-screen bg-white py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4">
-            {isUpdateMode ? 'Update Your Preferences' : 'Welcome to VolunteerHub'}
+            {isUpdateMode ? 'Update Your Preferences' : `Welcome to VolunteerHub${isAdmin ? ' - Admin' : ''}`}
           </h1>
           <p className="text-gray-600 text-sm sm:text-base">
             {isUpdateMode 
               ? 'Update your volunteering preferences to get better recommendations.'
-              : 'Tell us about your volunteering preferences to get personalized recommendations.'
+              : isAdmin 
+                ? 'As an admin, you can both volunteer and approve opportunities. Set your preferences to get personalized recommendations.'
+                : 'Tell us about your volunteering preferences to get personalized recommendations.'
             }
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+          {/* Phone Number */}
+          <div>
+            <h2 className="text-lg sm:text-xl font-semibold text-black mb-4">
+              Contact Information
+            </h2>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number (Optional)
+              </label>
+              <input
+                type="tel"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                placeholder="+1 (555) 123-4567"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                We'll use this to contact you about volunteering opportunities
+              </p>
+            </div>
+          </div>
+
           {/* Volunteering Types */}
           <div>
             <h2 className="text-lg sm:text-xl font-semibold text-black mb-4">
@@ -189,14 +268,24 @@ export default function OnboardingForm({ isUpdateMode = false }: OnboardingFormP
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="pt-4">
+          {/* Buttons */}
+          <div className="pt-4 space-y-3">
             <button
               type="submit"
               className="w-full bg-red-600 text-white py-3 sm:py-4 px-6 rounded-lg font-semibold text-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
               {isUpdateMode ? 'Update Preferences' : 'Get Started'}
             </button>
+            
+            {!isUpdateMode && (
+              <button
+                type="button"
+                onClick={handleSkip}
+                className="w-full bg-gray-100 text-gray-700 py-3 sm:py-4 px-6 rounded-lg font-semibold text-lg hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                Skip for Now
+              </button>
+            )}
           </div>
         </form>
       </div>
