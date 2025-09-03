@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // API Base URL from environment variable
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
 // Axios instance with default configuration
 const apiClient = axios.create({
@@ -178,7 +178,6 @@ export const volunteerSubmissionAPI = {
     return apiCall('DELETE', `/volunteer-submission/${id}`);
   },
 };
-
 // ===== NOTIFICATIONS API FUNCTIONS =====
 
 export interface Notification {

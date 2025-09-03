@@ -2,17 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { causeAPI } from '../utils/api';
 
-const volunteeringTypes = [
-  { id: 'environment', label: 'Environment & Conservation' },
-  { id: 'education', label: 'Education & Tutoring' },
-  { id: 'elderly', label: 'Elderly Care' },
-  { id: 'healthcare', label: 'Healthcare & Medical' },
-  { id: 'animals', label: 'Animal Welfare' },
-  { id: 'community', label: 'Community Service' },
-  { id: 'youth', label: 'Youth Development' },
-  { id: 'food', label: 'Food Security & Hunger' }
-];
+interface Cause {
+  id: string;
+  code: string;
+  description: string;
+}
 
 const daysOptions = [
   { id: 'monday', label: 'Monday' },
@@ -30,11 +26,43 @@ interface OnboardingFormProps {
 
 export default function OnboardingForm({ isUpdateMode = false }: OnboardingFormProps) {
   const router = useRouter();
+  const [causes, setCauses] = useState<Cause[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState<string>('');
   const [formData, setFormData] = useState({
     volunteeringTypes: [] as string[],
     preferredDays: [] as string[],
     phoneNumber: ''
   });
+
+  // Fetch causes from backend
+  useEffect(() => {
+    const fetchCauses = async () => {
+      setLoading(true);
+      try {
+        console.log('Fetching causes from API...');
+        const causesData = await causeAPI.getAll();
+        console.log('Causes received:', causesData);
+        setCauses(causesData as Cause[]);
+      } catch (error) {
+        console.error('Failed to fetch causes:', error);
+        if (error instanceof Error) {
+          console.error('Error details:', {
+            message: error.message,
+            name: error.name,
+            stack: error.stack
+          });
+          setApiError(error.message);
+        }
+        // Fallback to empty array if API fails
+        setCauses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCauses();
+  }, []);
 
   // Load existing preferences only if in update mode
   useEffect(() => {
@@ -202,37 +230,64 @@ export default function OnboardingForm({ isUpdateMode = false }: OnboardingFormP
               What types of volunteering interest you?
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {volunteeringTypes.map((type) => (
-                <label
-                  key={type.id}
-                  className={`flex items-center p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors ${
-                    formData.volunteeringTypes.includes(type.id)
-                      ? 'border-red-500 bg-red-50'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={formData.volunteeringTypes.includes(type.id)}
-                    onChange={() => handleTypeChange(type.id)}
-                    className="sr-only"
-                  />
-                  <div className="flex items-center">
-                    <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
-                      formData.volunteeringTypes.includes(type.id)
-                        ? 'border-red-500 bg-red-500'
-                        : 'border-gray-300'
-                    }`}>
-                      {formData.volunteeringTypes.includes(type.id) && (
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
+              {loading ? (
+                <div className="col-span-2 text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading causes...</p>
+                </div>
+              ) : causes.length > 0 ? (
+                causes.map((cause) => (
+                  <label
+                    key={cause.id}
+                    className={`flex items-center p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors ${
+                      formData.volunteeringTypes.includes(cause.code)
+                        ? 'border-red-500 bg-red-50'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.volunteeringTypes.includes(cause.code)}
+                      onChange={() => handleTypeChange(cause.code)}
+                      className="sr-only"
+                    />
+                    <div className="flex items-center">
+                      <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
+                        formData.volunteeringTypes.includes(cause.code)
+                          ? 'border-red-500 bg-red-500'
+                          : 'border-gray-300'
+                      }`}>
+                        {formData.volunteeringTypes.includes(cause.code) && (
+                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                      <span className="text-sm sm:text-base text-black">{cause.description}</span>
                     </div>
-                    <span className="text-sm sm:text-base text-black">{type.label}</span>
+                  </label>
+                ))
+              ) : apiError ? (
+                <div className="col-span-2 text-center py-8">
+                  <div className="text-red-600 mb-4">
+                    <svg className="w-12 h-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
                   </div>
-                </label>
-              ))}
+                  <h3 className="text-lg font-semibold text-red-800 mb-2">API Connection Error</h3>
+                  <p className="text-red-600 mb-4">{apiError}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Retry Connection
+                  </button>
+                </div>
+              ) : (
+                <div className="col-span-2 text-center py-8">
+                  <p className="text-gray-600">No causes available. Please try again later.</p>
+                </div>
+              )}
             </div>
           </div>
 
